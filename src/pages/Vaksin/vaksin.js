@@ -147,7 +147,7 @@ class Vaksin extends Component {
                 >
                   <option value="">Pilih warga sudah di vaksin ?</option>
                   <option value="sudah">Sudah</option>
-                  <option value="">Belum</option>
+                  <option value="belum">Belum</option>
                   <option value="tidak">Tidak</option>
                 </Form.Control>
               </Form.Group>
