@@ -10,7 +10,7 @@ class Vaksin extends Component {
     this.state = {
       data: [],
       search: "",
-      sort: "",
+      sort: "rw_umur DESC",
       id: "",
       form: {
         name: "",
