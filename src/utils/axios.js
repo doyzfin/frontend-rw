@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosApiIntances = axios.create({
-  baseURL: "http://192.168.1.2:3009/backend1/api/v1",
+  baseURL: "http://localhost:3009/backend1/api/v1",
 });
 // Add a request interceptor
 axiosApiIntances.interceptors.request.use(
