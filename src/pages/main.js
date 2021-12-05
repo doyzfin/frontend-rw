@@ -1,172 +1,164 @@
-import React, { Component } from "react";
+import { Card, Form, Button } from "react-bootstrap";
+import Swal from "sweetalert2";
+import moment from "moment";
+import "moment/locale/id";
+import { useState } from "react";
 import axiosApiIntances from "../utils/axios";
-import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 
-import styles from "./main.module.css";
+const Main = () => {
+  const [nama, setNama] = useState("");
+  const [alamat, setAlamat] = useState("");
+  const [tanggal, setTanggal] = useState("");
+  const [umur, setUmur] = useState(0);
+  const [pendidikan, setPendidikan] = useState("");
+  const [nik, setNik] = useState("");
+  const [bpjs, setBpjs] = useState("");
 
-class Main extends Component {
-  constructor() {
-    super();
-    this.state = {
-      data: [],
-    };
-  }
-  componentDidMount() {
-    this.getData();
-  }
-  getData = () => {
-    axiosApiIntances.get("/rw").then((res) => {
-      console.log(res);
-      this.setState({ data: res.data.data });
+  const handleSubmit = () => {
+    Swal.fire({
+      title: "Apakah Anda Yakin Untuk Simpan ?",
+      showDenyButton: true,
+
+      confirmButtonText: "Iyaa",
+      denyButtonText: `Batal`,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const setData = {
+          nama: nama,
+          alamat: alamat,
+          tanggalLahir: tanggal,
+          umur: umur && umur.slice(0, 2),
+          pendidikan: pendidikan,
+          nik: nik,
+          bpjs: bpjs,
+          vaksin: "",
+          tempatVaksin: "",
+        };
+        axiosApiIntances
+          .post("/rw", setData)
+          .then((res) => {
+            Swal.fire("Berhasil!", res.data.msg, "success");
+            resetForm();
+          })
+          .catch((err) => {
+            Swal.fire("Error!", err.response.data.msg, "error");
+          });
+      }
     });
   };
-  handleVaksin = () => {
-    this.props.history.push("/vaksin");
-  };
-  render() {
-    return (
-      <>
-        <Container fluid>
-          <h1 className={styles.mainTitle}>RW 10 Daftar Warga</h1>
-          <Card className={styles.mainCardForm}>
-            <Form>
-              <Form.Group>
-                <Form.Label className={styles.label}>Nama </Form.Label>
-                <Form.Control type="text" placeholder="isi nama warga" />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label className={styles.label}>Alamat </Form.Label>
-                <Form.Control type="text" placeholder="isi alamat warga" />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label className={styles.label}>Tanggal Lahir </Form.Label>
-                <Form.Control type="date" />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label className={styles.label}>Umur </Form.Label>
-                <Form.Control type="text" disabled />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label className={styles.label}>Pendidikan </Form.Label>
-                <Form.Control type="text" placeholder="isi pendidikan warga" />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label className={styles.label}>NIK </Form.Label>
-                <Form.Control type="text" placeholder="isi no NIK warga" />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label className={styles.label}>BPJS </Form.Label>
-                <Form.Control type="text" placeholder="isi no BPJS warga" />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label className={styles.label}>Status Vaksin </Form.Label>
-                <Form.Control as="select">
-                  <option value="">Pilih warga sudah di vaksin ?</option>
-                  <option value="sudah">Sudah</option>
-                  <option value="belum">Belum</option>
-                </Form.Control>
-              </Form.Group>
-              <Form.Group>
-                <Form.Label className={styles.label}>Tempat Vaksin </Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="isi dimana warga di vaksin"
-                />
-              </Form.Group>
-              <Button className={styles.button} onClick={this.handleVaksin}>
-                Vaksin
-              </Button>
-            </Form>
-          </Card>
 
-          <Row>
-            <Col xs={12}>
-              <Card className={styles.mainCard1}>
-                <Row>
-                  <Col className={styles.mainTitle1} sm={2}>
-                    Nama
-                  </Col>
-                  <Col className={styles.mainTitle1} sm={1}>
-                    Alamat
-                  </Col>
-                  <Col className={styles.mainTitle1} sm={1}>
-                    Tanggal Lahir
-                  </Col>
-                  <Col className={styles.mainTitle1} sm={1}>
-                    Umur
-                  </Col>
-                  <Col className={styles.mainTitle1} sm={1}>
-                    Pendidikan
-                  </Col>
-                  <Col className={styles.mainTitle1} sm={2}>
-                    NIK
-                  </Col>
-                  <Col className={styles.mainTitle1} sm={1}>
-                    BPJS
-                  </Col>
-                  <Col className={styles.mainTitle1} sm={1}>
-                    Status Vaksin
-                  </Col>
-                  <Col className={styles.mainTitle1} sm={1}>
-                    Tempat Vaksin
-                  </Col>
-                </Row>
-              </Card>
-            </Col>
-            <hr />
-            {this.state.data.map((item, index) => {
-              return (
-                <>
-                  <Col sm={12} key={index}>
-                    <Card className={styles.mainCard}>
-                      <Row>
-                        <Col sm={2} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>{item.rw_name}</h1>
-                        </Col>
-                        <Col sm={1} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>{item.rw_alamat}</h1>
-                        </Col>
-                        <Col sm={1} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>
-                            {item.rw_tanggal_lahir.slice(0, 10)}
-                          </h1>
-                        </Col>
-                        <Col sm={1} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>{item.rw_umur}</h1>
-                        </Col>
-                        <Col sm={1} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>
-                            {item.rw_pendidikan}
-                          </h1>
-                        </Col>
-                        <Col sm={2} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>{item.rw_nik}</h1>
-                        </Col>
-                        <Col sm={1} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>{item.rw_bpjs}</h1>
-                        </Col>
-                        <Col sm={1} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>{item.rw_vaksin}</h1>
-                        </Col>
-                        <Col sm={1} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>
-                            {item.rw_tempat_vaksin}
-                          </h1>
-                        </Col>
-                        <Col sm={1} className={styles.mainCol}>
-                          <h1 className={styles.mainText}>{item.rw_name}</h1>
-                        </Col>
-                      </Row>
-                    </Card>
-                  </Col>
-                </>
-              );
-            })}
-          </Row>
-        </Container>
-      </>
-    );
-  }
-}
+  const resetForm = () => {
+    setNama("");
+    setAlamat("");
+    setTanggal("");
+    setUmur(0);
+    setPendidikan("");
+    setNik("");
+    setBpjs("");
+  };
+
+  const handleUmur = (e) => {
+    let umur = moment(e.target.value, "YYYYMMDD").fromNow();
+    setTanggal(e.target.value);
+    setUmur(umur.slice(0, 8));
+  };
+  return (
+    <>
+      <center>
+        <h1 style={{ marginTop: "20px", marginBottom: "30px" }}>
+          INPUT DATA WARGA RW 10
+        </h1>
+      </center>
+      <Card
+        style={{
+          width: "500px",
+          padding: "20px",
+          margin: "0 auto",
+
+          marginBottom: "20px",
+        }}
+      >
+        <Form>
+          <Form.Group>
+            <Form.Label>Nama</Form.Label>
+            <Form.Control
+              type="text"
+              required
+              placeholder="Silahkan Isi Nama"
+              value={nama}
+              onChange={(e) => setNama(e.target.value)}
+            ></Form.Control>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Alamat</Form.Label>
+            <Form.Control
+              type="text"
+              required
+              placeholder="Silahkan Isi Alamat"
+              value={alamat}
+              onChange={(e) => setAlamat(e.target.value)}
+            ></Form.Control>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Tanggal Lahir</Form.Label>
+            <Form.Control
+              type="date"
+              required
+              value={tanggal}
+              onChange={(event) => handleUmur(event)}
+            ></Form.Control>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Umur</Form.Label>
+            <Form.Control
+              type="text"
+              disabled
+              required
+              value={umur}
+            ></Form.Control>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Pendidikan</Form.Label>
+            <Form.Control
+              type="text"
+              required
+              value={pendidikan}
+              placeholder="Silahkan Isi Pendidikan"
+              onChange={(e) => setPendidikan(e.target.value)}
+            ></Form.Control>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>NIK</Form.Label>
+            <Form.Control
+              type="number"
+              required
+              value={nik}
+              maxLength={16}
+              minLength={16}
+              placeholder="Silahkan Isi NIK"
+              onChange={(e) => setNik(e.target.value)}
+            ></Form.Control>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>BPJS</Form.Label>
+            <Form.Control
+              type="number"
+              required
+              value={bpjs}
+              placeholder="Silahkan Isi BPJS"
+              onChange={(e) => setBpjs(e.target.value)}
+            ></Form.Control>
+          </Form.Group>
+          <Button block variant="primary" onClick={handleSubmit}>
+            Kirim
+          </Button>
+        </Form>
+      </Card>
+      <center>
+        <a href="/data">Lihat Table</a>
+      </center>
+    </>
+  );
+};
 
 export default Main;
