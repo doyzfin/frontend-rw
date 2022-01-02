@@ -1,162 +1,388 @@
-import { Card, Form, Button } from "react-bootstrap";
+// import { Card, Form, Button } from "react-bootstrap";
 import Swal from "sweetalert2";
 import moment from "moment";
 import "moment/locale/id";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axiosApiIntances from "../utils/axios";
+import {
+  Card,
+  Button,
+  Table,
+  Modal,
+  message,
+  Form,
+  Input,
+  Space,
+  Tooltip,
+  InputNumber,
+} from "antd";
+import {
+  DownloadOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+import axios from "axios";
 
 const Main = () => {
-  const [nama, setNama] = useState("");
-  const [alamat, setAlamat] = useState("");
-  const [tanggal, setTanggal] = useState("");
-  const [umur, setUmur] = useState(0);
-  const [pendidikan, setPendidikan] = useState("");
-  const [nik, setNik] = useState("");
-  const [bpjs, setBpjs] = useState("");
+  const [data, setData] = useState([]);
+  const [one, setOne] = useState({});
+  const [show, setShow] = useState(false);
+  const [add, setAdd] = useState(false);
 
-  const handleSubmit = () => {
+  const columns = [
+    {
+      title: "No",
+      dataIndex: "no",
+    },
+    {
+      title: "Nama",
+      dataIndex: "rw_name",
+    },
+    {
+      title: "Alamat",
+      dataIndex: "rw_alamat",
+    },
+    {
+      title: "Tanggal Lahir",
+      dataIndex: "rw_tanggal_lahir",
+    },
+    {
+      title: "Umur",
+      dataIndex: "rw_umur",
+    },
+    {
+      title: "Pendidikan",
+      dataIndex: "rw_pendidikan",
+    },
+    {
+      title: "NIK",
+      dataIndex: "rw_nik",
+    },
+    {
+      title: "BPJS",
+      dataIndex: "rw_bpjs",
+    },
+    {
+      title: "Aksi",
+
+      render: (text, record) => (
+        <>
+          <Space size="middle">
+            <Tooltip title="Edit">
+              <EditOutlined
+                className="mr-3"
+                onClick={() => handleModal(record)}
+              />
+            </Tooltip>
+            <Tooltip title="Hapus">
+              <DeleteOutlined onClick={() => handleDelete(record)} />
+            </Tooltip>
+          </Space>
+        </>
+      ),
+    },
+  ];
+
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const getData = () => {
+    axios
+      .get("https://rw10-app.herokuapp.com/backend1/api/v1/rw/")
+      .then((res) => {
+        setData(
+          res.data.data.map((item, index) => {
+            return {
+              ...item,
+              no: index + 1,
+              rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+              rw_tanggal: item.rw_tanggal_lahir,
+            };
+          })
+        );
+      });
+  };
+
+  const handleModal = (values) => {
+    form.setFieldsValue({
+      name: values.rw_name,
+      alamat: values.rw_alamat,
+      tanggal_lahir: values.rw_tanggal_lahir,
+      umur: values.rw_umur,
+      pendidikan: values.rw_pendidikan,
+      nik: values.rw_nik,
+      bpjs: values.rw_bpjs,
+    });
+    axios
+      .get(`https://rw10-app.herokuapp.com/backend1/api/v1/rw/${values.rw_id}`)
+      .then((res) => {
+        setOne(res.data.data[0]);
+      });
+
+    setShow(true);
+  };
+
+  const handleDelete = (item) => {
     Swal.fire({
-      title: "Apakah Anda Yakin Untuk Simpan ?",
+      title: "Apakah Anda Yakin  Hapus?",
       showDenyButton: true,
 
       confirmButtonText: "Iyaa",
       denyButtonText: `Batal`,
     }).then((result) => {
       if (result.isConfirmed) {
-        const setData = {
-          nama: nama,
-          alamat: alamat,
-          tanggalLahir: tanggal,
-          umur: umur && umur.slice(0, 2),
-          pendidikan: pendidikan,
-          nik: nik,
-          bpjs: bpjs,
-          vaksin: "",
-          tempatVaksin: "",
-        };
-        axiosApiIntances
-          .post("/rw", setData)
+        axios
+          .delete(
+            `https://rw10-app.herokuapp.com/backend1/api/v1/rw/${item.rw_id}`
+          )
           .then((res) => {
-            Swal.fire("Berhasil!", res.data.msg, "success");
-            resetForm();
+            message.success("Berhasil Hapus Data");
+            getData();
           })
           .catch((err) => {
-            Swal.fire("Error!", err.response.data.msg, "error");
+            message.error("Gagal Menghapus");
           });
       }
     });
   };
 
-  const resetForm = () => {
-    setNama("");
-    setAlamat("");
-    setTanggal("");
-    setUmur(0);
-    setPendidikan("");
-    setNik("");
-    setBpjs("");
+  const onUpdate = (id) => {
+    form.validateFields().then((values) => {
+      Swal.fire({
+        title: "Apakah Anda Yakin  Update?",
+        showDenyButton: true,
+
+        confirmButtonText: "Iyaa",
+        denyButtonText: `Batal`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const setData = {
+            nama: values.name,
+            alamat: values.alamat,
+            tanggalLahir: values.tanggal_lahir,
+            umur: values.umur && values.umur.slice(0, 2),
+            pendidikan: values.pendidikan,
+            nik: values.nik,
+            bpjs: values.bpjs,
+            vaksin: "",
+            tempatVaksin: "",
+          };
+          axios
+            .patch(
+              `https://rw10-app.herokuapp.com/backend1/api/v1/rw/${id}`,
+              setData
+            )
+            .then((res) => {
+              message.success("Berhasil Update Data Warga");
+              setShow(false);
+              getData();
+            })
+            .catch((err) => {
+              message.error("Gagal Update Data Warga");
+            });
+        }
+      });
+    });
+  };
+
+  const handleSubmit = () => {
+    form.validateFields().then((values) => {
+      Swal.fire({
+        title: "Apakah Anda Yakin Untuk Simpan ?",
+        showDenyButton: true,
+
+        confirmButtonText: "Iyaa",
+        denyButtonText: `Batal`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const setData = {
+            nama: values.name,
+            alamat: values.alamat,
+            tanggalLahir: values.tanggal_lahir,
+            umur: values.umur && values.umur.slice(0, 2),
+            pendidikan: values.pendidikan,
+            nik: values.nik,
+            bpjs: values.bpjs,
+            vaksin: "",
+            tempatVaksin: "",
+          };
+          axiosApiIntances
+            .post("/rw", setData)
+            .then((res) => {
+              message.success("Berhasil Menambah Data");
+              setAdd(false);
+              getData();
+              form.resetFields();
+            })
+            .catch((err) => {
+              message.error(err.response.data.msg);
+            });
+        }
+      });
+    });
   };
 
   const handleUmur = (e) => {
+    console.log(e.target.value);
     let umur = moment(e.target.value, "YYYYMMDD").fromNow();
-    setTanggal(e.target.value);
-    setUmur(umur.slice(0, 8));
+
+    form.setFieldsValue({
+      umur: umur.slice(0, 8),
+    });
   };
+
   return (
     <>
-      <center>
-        <h1 style={{ marginTop: "20px", marginBottom: "30px" }}>
-          INPUT DATA WARGA RW 10
-        </h1>
-      </center>
       <Card
-        style={{
-          width: "500px",
-          padding: "20px",
-          margin: "0 auto",
-
-          marginBottom: "20px",
-        }}
+        title="Data Warga RW 10"
+        extra={
+          <>
+            <Button type="primary" onClick={() => setAdd(true)}>
+              Tambah Data
+            </Button>{" "}
+            <Button type="primary" icon={<DownloadOutlined />} />
+          </>
+        }
       >
-        <Form>
-          <Form.Group>
-            <Form.Label>Nama</Form.Label>
-            <Form.Control
-              type="text"
-              required
-              placeholder="Silahkan Isi Nama"
-              value={nama}
-              onChange={(e) => setNama(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Alamat</Form.Label>
-            <Form.Control
-              type="text"
-              required
-              placeholder="Silahkan Isi Alamat"
-              value={alamat}
-              onChange={(e) => setAlamat(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Tanggal Lahir</Form.Label>
-            <Form.Control
-              type="date"
-              required
-              value={tanggal}
-              onChange={(event) => handleUmur(event)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Umur</Form.Label>
-            <Form.Control
-              type="text"
-              disabled
-              required
-              value={umur}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Pendidikan</Form.Label>
-            <Form.Control
-              type="text"
-              required
-              value={pendidikan}
-              placeholder="Silahkan Isi Pendidikan"
-              onChange={(e) => setPendidikan(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>NIK</Form.Label>
-            <Form.Control
-              type="number"
-              required
-              value={nik}
-              maxLength={16}
-              minLength={16}
-              placeholder="Silahkan Isi NIK"
-              onChange={(e) => setNik(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>BPJS</Form.Label>
-            <Form.Control
-              type="number"
-              required
-              value={bpjs}
-              placeholder="Silahkan Isi BPJS"
-              onChange={(e) => setBpjs(e.target.value)}
-            ></Form.Control>
-          </Form.Group>
-          <Button block variant="primary" onClick={handleSubmit}>
-            Kirim
-          </Button>
-        </Form>
+        <Table columns={columns} style={{ width: "100%" }} dataSource={data} />
       </Card>
-      <center>
-        <a href="/data">Lihat Table</a>
-      </center>
+      <Modal
+        title="Edit Data Warga"
+        visible={show}
+        onOk={() => onUpdate(one.rw_id)}
+        onCancel={() => setShow(false)}
+      >
+        <Form layout="vertical" form={form}>
+          <Form.Item
+            label="Nama"
+            name="name"
+            rules={[{ required: true, message: "Nama Wajib Diisi!" }]}
+          >
+            <Input placeholder="Masukkan Nama" />
+          </Form.Item>
+          <Form.Item
+            label="Alamat"
+            name="alamat"
+            rules={[{ required: true, message: "Alamat Wajib Diisi!" }]}
+          >
+            <Input placeholder="Masukkan Alamat" />
+          </Form.Item>
+          <Form.Item
+            label={`Tanggal Lahir *(harap diisi kemnbail)`}
+            name="tanggal_lahir"
+            rules={[{ required: true, message: "Tanggal Lahir Wajib Diisi!" }]}
+          >
+            <Input type="date" onChange={(e) => handleUmur(e)} />
+          </Form.Item>
+          <Form.Item
+            label="Umur"
+            name="umur"
+            rules={[{ required: true, message: "Umur Wajib Diisi!" }]}
+          >
+            <Input placeholder="Masukkan Umur" />
+          </Form.Item>
+          <Form.Item
+            label="Pendidikan"
+            name="pendidikan"
+            rules={[{ required: true, message: "Pendidikan Diisi!" }]}
+          >
+            <Input placeholder="Masukkan Pendidikan" />
+          </Form.Item>
+          <Form.Item
+            label="NIK"
+            name="nik"
+            rules={[{ required: true, message: "NIK Wajib Diisi!" }]}
+          >
+            <InputNumber
+              placeholder="Masukkan NIK"
+              maxLength={16}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+          <Form.Item
+            label="No BPJS"
+            name="bpjs"
+            rules={[{ required: true, message: "No BPJS Diisi!" }]}
+          >
+            <InputNumber
+              placeholder="Masukkan No BPJS"
+              maxLength={16}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Tambah Data Warga"
+        visible={add}
+        onOk={handleSubmit}
+        onCancel={() => setAdd(false)}
+      >
+        {" "}
+        <Form layout="vertical" form={form}>
+          <Form.Item
+            label="Nama"
+            name="name"
+            rules={[{ required: true, message: "Nama Wajib Diisi!" }]}
+          >
+            <Input placeholder="Masukkan Nama" />
+          </Form.Item>
+          <Form.Item
+            label="Alamat"
+            name="alamat"
+            rules={[{ required: true, message: "Alamat Wajib Diisi!" }]}
+          >
+            <Input placeholder="Masukkan Alamat" />
+          </Form.Item>
+          <Form.Item
+            label={`Tanggal Lahir *(harap diisi kemnbail)`}
+            name="tanggal_lahir"
+            rules={[{ required: true, message: "Tanggal Lahir Wajib Diisi!" }]}
+          >
+            <Input type="date" onChange={(e) => handleUmur(e)} />
+          </Form.Item>
+          <Form.Item
+            label="Umur"
+            name="umur"
+            rules={[{ required: true, message: "Umur Wajib Diisi!" }]}
+          >
+            <Input placeholder="Masukkan Umur" />
+          </Form.Item>
+          <Form.Item
+            label="Pendidikan"
+            name="pendidikan"
+            rules={[{ required: true, message: "Pendidikan Diisi!" }]}
+          >
+            <Input placeholder="Masukkan Pendidikan" />
+          </Form.Item>
+          <Form.Item
+            label="NIK"
+            name="nik"
+            rules={[{ required: true, message: "NIK Wajib Diisi!" }]}
+          >
+            <InputNumber
+              placeholder="Masukkan NIK"
+              maxLength={16}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+          <Form.Item
+            label="No BPJS"
+            name="bpjs"
+            rules={[{ required: true, message: "No BPJS Diisi!" }]}
+          >
+            <InputNumber
+              placeholder="Masukkan No BPJS"
+              maxLength={16}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   );
 };
