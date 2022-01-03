@@ -233,6 +233,26 @@ const Main = () => {
     });
   };
 
+  const onSearch = (e) => {
+    axios
+      .get(
+        `https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${e.target.value}`
+      )
+      .then((res) => {
+        setData(res.data.data);
+      });
+  };
+
+  const onSearchEnter = (e) => {
+    axios
+      .get(`https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${e}`)
+      .then((res) => {
+        setData(res.data.data);
+      });
+  };
+
+  const { Search } = Input;
+
   return (
     <>
       <Card
@@ -247,6 +267,12 @@ const Main = () => {
           </>
         }
       >
+        <Search
+          placeholder="Cari disini ..."
+          onSearch={onSearchEnter}
+          onChange={onSearch}
+          style={{ width: 200, marginBottom: "10px" }}
+        />
         <div style={{ overflowX: "scroll" }}>
           <Table
             columns={columns}
@@ -378,11 +404,7 @@ const Main = () => {
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item
-            label="No BPJS"
-            name="bpjs"
-            rules={[{ required: true, message: "No BPJS Diisi!" }]}
-          >
+          <Form.Item label="No BPJS" name="bpjs">
             <InputNumber
               placeholder="Masukkan No BPJS"
               maxLength={16}
