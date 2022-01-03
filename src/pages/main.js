@@ -296,8 +296,18 @@ const Main = () => {
   }
 
   const handleLogut = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/";
+    Swal.fire({
+      title: "Apakah Anda Yakin Keluar ?",
+      showDenyButton: true,
+
+      confirmButtonText: "Iyaa",
+      denyButtonText: `Batal`,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("token");
+        window.location.href = "/";
+      }
+    });
   };
 
   return (
