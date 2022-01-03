@@ -22,7 +22,6 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import axios from "axios";
 
 const Main = () => {
   const [data, setData] = useState([]);
@@ -93,20 +92,18 @@ const Main = () => {
   }, []);
 
   const getData = () => {
-    axios
-      .get("https://rw10-app.herokuapp.com/backend1/api/v1/rw/")
-      .then((res) => {
-        setData(
-          res.data.data.map((item, index) => {
-            return {
-              ...item,
-              no: index + 1,
-              rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
-              rw_tanggal: item.rw_tanggal_lahir,
-            };
-          })
-        );
-      });
+    axiosApiIntances.get("/rw").then((res) => {
+      setData(
+        res.data.data.map((item, index) => {
+          return {
+            ...item,
+            no: index + 1,
+            rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+            rw_tanggal: item.rw_tanggal_lahir,
+          };
+        })
+      );
+    });
   };
 
   const handleModal = (values) => {
@@ -119,11 +116,9 @@ const Main = () => {
       nik: values.rw_nik,
       bpjs: values.rw_bpjs,
     });
-    axios
-      .get(`https://rw10-app.herokuapp.com/backend1/api/v1/rw/${values.rw_id}`)
-      .then((res) => {
-        setOne(res.data.data[0]);
-      });
+    axiosApiIntances.get(`/rw/${values.rw_id}`).then((res) => {
+      setOne(res.data.data[0]);
+    });
 
     setShow(true);
   };
@@ -137,10 +132,8 @@ const Main = () => {
       denyButtonText: `Batal`,
     }).then((result) => {
       if (result.isConfirmed) {
-        axios
-          .delete(
-            `https://rw10-app.herokuapp.com/backend1/api/v1/rw/${item.rw_id}`
-          )
+        axiosApiIntances
+          .delete(`/rw/${item.rw_id}`)
           .then((res) => {
             message.success("Berhasil Hapus Data");
             getData();
@@ -173,11 +166,8 @@ const Main = () => {
             vaksin: "",
             tempatVaksin: "",
           };
-          axios
-            .patch(
-              `https://rw10-app.herokuapp.com/backend1/api/v1/rw/${id}`,
-              setData
-            )
+          axiosApiIntances
+            .patch(`/rw/${id}`, setData)
             .then((res) => {
               message.success("Berhasil Update Data Warga");
               setShow(false);
@@ -238,40 +228,34 @@ const Main = () => {
 
   const onSearch = (e) => {
     setSearch(e.target.value);
-    axios
-      .get(
-        `https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${e.target.value}`
-      )
-      .then((res) => {
-        setData(
-          res.data.data.map((item, index) => {
-            return {
-              ...item,
-              no: index + 1,
-              rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
-              rw_tanggal: item.rw_tanggal_lahir,
-            };
-          })
-        );
-      });
+    axiosApiIntances.get(`/rw?search=${e.target.value}`).then((res) => {
+      setData(
+        res.data.data.map((item, index) => {
+          return {
+            ...item,
+            no: index + 1,
+            rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+            rw_tanggal: item.rw_tanggal_lahir,
+          };
+        })
+      );
+    });
   };
 
   const onSearchEnter = (e) => {
     setSearch(e);
-    axios
-      .get(`https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${e}`)
-      .then((res) => {
-        setData(
-          res.data.data.map((item, index) => {
-            return {
-              ...item,
-              no: index + 1,
-              rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
-              rw_tanggal: item.rw_tanggal_lahir,
-            };
-          })
-        );
-      });
+    axiosApiIntances.get(`/rw?search=${e}`).then((res) => {
+      setData(
+        res.data.data.map((item, index) => {
+          return {
+            ...item,
+            no: index + 1,
+            rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+            rw_tanggal: item.rw_tanggal_lahir,
+          };
+        })
+      );
+    });
   };
 
   const { Search } = Input;
@@ -281,39 +265,33 @@ const Main = () => {
   function handleChange(value) {
     setSort(value);
     if (search) {
-      axios
-        .get(
-          `https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${search}&sort=${value}`
-        )
-        .then((res) => {
-          setData(
-            res.data.data.map((item, index) => {
-              return {
-                ...item,
-                no: index + 1,
-                rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
-                rw_tanggal: item.rw_tanggal_lahir,
-              };
-            })
-          );
-          setSort("");
-        });
+      axiosApiIntances.get(`/rw?search=${search}&sort=${value}`).then((res) => {
+        setData(
+          res.data.data.map((item, index) => {
+            return {
+              ...item,
+              no: index + 1,
+              rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+              rw_tanggal: item.rw_tanggal_lahir,
+            };
+          })
+        );
+        setSort("");
+      });
     } else {
-      axios
-        .get(`https://rw10-app.herokuapp.com/backend1/api/v1/rw?sort=${value}`)
-        .then((res) => {
-          setData(
-            res.data.data.map((item, index) => {
-              return {
-                ...item,
-                no: index + 1,
-                rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
-                rw_tanggal: item.rw_tanggal_lahir,
-              };
-            })
-          );
-          setSort("");
-        });
+      axiosApiIntances.get(`/rw?sort=${value}`).then((res) => {
+        setData(
+          res.data.data.map((item, index) => {
+            return {
+              ...item,
+              no: index + 1,
+              rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+              rw_tanggal: item.rw_tanggal_lahir,
+            };
+          })
+        );
+        setSort("");
+      });
     }
   }
 
