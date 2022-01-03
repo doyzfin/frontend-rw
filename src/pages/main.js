@@ -357,7 +357,6 @@ const Main = () => {
             style={{ width: "100%" }}
             dataSource={data}
             size="small"
-            pagination={false}
           />
         </div>
       </Card>
