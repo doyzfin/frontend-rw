@@ -15,6 +15,7 @@ import {
   Space,
   Tooltip,
   InputNumber,
+  Select,
 } from "antd";
 import {
   DownloadOutlined,
@@ -28,6 +29,7 @@ const Main = () => {
   const [one, setOne] = useState({});
   const [show, setShow] = useState(false);
   const [add, setAdd] = useState(false);
+  const [search, setSearch] = useState("");
 
   const columns = [
     {
@@ -234,6 +236,7 @@ const Main = () => {
   };
 
   const onSearch = (e) => {
+    setSearch(e.target.value);
     axios
       .get(
         `https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${e.target.value}`
@@ -244,6 +247,7 @@ const Main = () => {
   };
 
   const onSearchEnter = (e) => {
+    setSearch(e);
     axios
       .get(`https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${e}`)
       .then((res) => {
@@ -252,6 +256,26 @@ const Main = () => {
   };
 
   const { Search } = Input;
+
+  const { Option } = Select;
+
+  function handleChange(value) {
+    if (search) {
+      axios
+        .get(
+          `https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${search}&sort=${value}`
+        )
+        .then((res) => {
+          setData(res.data.data);
+        });
+    } else {
+      axios
+        .get(`https://rw10-app.herokuapp.com/backend1/api/v1/rw?sort=${value}`)
+        .then((res) => {
+          setData(res.data.data);
+        });
+    }
+  }
 
   return (
     <>
@@ -273,6 +297,23 @@ const Main = () => {
           onChange={onSearch}
           style={{ width: 200, marginBottom: "10px" }}
         />
+        <Form>
+          <Form.Item label="Filter">
+            <Select
+              defaultValue=""
+              style={{ width: 120 }}
+              onChange={handleChange}
+              className="ml-3"
+            >
+              <Option value="">Silahkan Pilih Filter</Option>
+              <Option value="rw_name ASC">A - Z</Option>
+              <Option value="rw_name DESC">Z - A</Option>
+              <Option value="rw_umur ASC">Umur 0 - 100</Option>
+              <Option value="rw_umur DESC">Umur 100 - 0</Option>
+            </Select>
+          </Form.Item>
+        </Form>
+
         <div style={{ overflowX: "scroll" }}>
           <Table
             columns={columns}
@@ -305,7 +346,12 @@ const Main = () => {
             <Input placeholder="Masukkan Alamat" />
           </Form.Item>
           <Form.Item
-            label={`Tanggal Lahir *(harap diisi kemnbail)`}
+            label={
+              <p>
+                Tanggal Lahir{" "}
+                <span className="text-danger">*(harap diisi kembali)</span>
+              </p>
+            }
             name="tanggal_lahir"
             rules={[{ required: true, message: "Tanggal Lahir Wajib Diisi!" }]}
           >
@@ -373,7 +419,7 @@ const Main = () => {
             <Input placeholder="Masukkan Alamat" />
           </Form.Item>
           <Form.Item
-            label={`Tanggal Lahir *(harap diisi kemnbail)`}
+            label={`Tanggal Lahir `}
             name="tanggal_lahir"
             rules={[{ required: true, message: "Tanggal Lahir Wajib Diisi!" }]}
           >
@@ -404,7 +450,11 @@ const Main = () => {
               style={{ width: "100%" }}
             />
           </Form.Item>
-          <Form.Item label="No BPJS" name="bpjs">
+          <Form.Item
+            label="No BPJS"
+            name="bpjs"
+            rules={[{ required: true, message: "BPJS Wajib Diisi!" }]}
+          >
             <InputNumber
               placeholder="Masukkan No BPJS"
               maxLength={16}
