@@ -310,6 +310,12 @@ const Main = () => {
     });
   };
 
+  const handleExport = (e) => {
+    e.preventDefault();
+    window.location.href =
+      "https://rw10-app.herokuapp.com/backend1/api/v1/download/downloadExcel";
+  };
+
   return (
     <>
       <Card
@@ -320,7 +326,13 @@ const Main = () => {
             <Button type="primary" onClick={() => setAdd(true)}>
               Tambah Data
             </Button>{" "}
-            <Button type="primary" icon={<DownloadOutlined />} />
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={(e) => handleExport(e)}
+            >
+              Download Excel
+            </Button>
             <Button type="danger" className="ml-3" onClick={handleLogut}>
               Keluar
             </Button>
