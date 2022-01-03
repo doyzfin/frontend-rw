@@ -162,7 +162,7 @@ const Main = () => {
           const setData = {
             nama: values.name,
             alamat: values.alamat,
-            tanggalLahir: values.tanggal_lahir,
+            tanggalLahir: new Date(values.tanggal_lahir),
             umur: values.umur && values.umur.slice(0, 2),
             pendidikan: values.pendidikan,
             nik: values.nik,
@@ -213,9 +213,9 @@ const Main = () => {
             .post("/rw", setData)
             .then((res) => {
               message.success("Berhasil Menambah Data");
+              form.resetFields();
               setAdd(false);
               getData();
-              form.resetFields();
             })
             .catch((err) => {
               message.error(err.response.data.msg);
@@ -226,7 +226,6 @@ const Main = () => {
   };
 
   const handleUmur = (e) => {
-    console.log(e.target.value);
     let umur = moment(e.target.value, "YYYYMMDD").fromNow();
 
     form.setFieldsValue({
@@ -237,6 +236,7 @@ const Main = () => {
   return (
     <>
       <Card
+        size="small"
         title="Data Warga RW 10"
         extra={
           <>
@@ -247,7 +247,15 @@ const Main = () => {
           </>
         }
       >
-        <Table columns={columns} style={{ width: "100%" }} dataSource={data} />
+        <div style={{ overflowX: "scroll" }}>
+          <Table
+            columns={columns}
+            style={{ width: "100%" }}
+            dataSource={data}
+            size="small"
+            pagination={false}
+          />
+        </div>
       </Card>
       <Modal
         title="Edit Data Warga"
@@ -350,7 +358,7 @@ const Main = () => {
             name="umur"
             rules={[{ required: true, message: "Umur Wajib Diisi!" }]}
           >
-            <Input placeholder="Masukkan Umur" />
+            <Input placeholder="Masukkan Umur" disabled />
           </Form.Item>
           <Form.Item
             label="Pendidikan"
