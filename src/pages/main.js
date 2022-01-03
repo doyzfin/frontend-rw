@@ -30,6 +30,7 @@ const Main = () => {
   const [show, setShow] = useState(false);
   const [add, setAdd] = useState(false);
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("");
 
   const columns = [
     {
@@ -242,7 +243,16 @@ const Main = () => {
         `https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${e.target.value}`
       )
       .then((res) => {
-        setData(res.data.data);
+        setData(
+          res.data.data.map((item, index) => {
+            return {
+              ...item,
+              no: index + 1,
+              rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+              rw_tanggal: item.rw_tanggal_lahir,
+            };
+          })
+        );
       });
   };
 
@@ -251,7 +261,16 @@ const Main = () => {
     axios
       .get(`https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${e}`)
       .then((res) => {
-        setData(res.data.data);
+        setData(
+          res.data.data.map((item, index) => {
+            return {
+              ...item,
+              no: index + 1,
+              rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+              rw_tanggal: item.rw_tanggal_lahir,
+            };
+          })
+        );
       });
   };
 
@@ -260,19 +279,40 @@ const Main = () => {
   const { Option } = Select;
 
   function handleChange(value) {
+    setSort(value);
     if (search) {
       axios
         .get(
           `https://rw10-app.herokuapp.com/backend1/api/v1/rw?search=${search}&sort=${value}`
         )
         .then((res) => {
-          setData(res.data.data);
+          setData(
+            res.data.data.map((item, index) => {
+              return {
+                ...item,
+                no: index + 1,
+                rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+                rw_tanggal: item.rw_tanggal_lahir,
+              };
+            })
+          );
+          setSort("");
         });
     } else {
       axios
         .get(`https://rw10-app.herokuapp.com/backend1/api/v1/rw?sort=${value}`)
         .then((res) => {
-          setData(res.data.data);
+          setData(
+            res.data.data.map((item, index) => {
+              return {
+                ...item,
+                no: index + 1,
+                rw_tanggal_lahir: moment(item.rw_tanggal_lahir).format("ll"),
+                rw_tanggal: item.rw_tanggal_lahir,
+              };
+            })
+          );
+          setSort("");
         });
     }
   }
@@ -300,10 +340,11 @@ const Main = () => {
         <Form>
           <Form.Item label="Filter">
             <Select
-              defaultValue=""
+              defaultValue={sort}
               style={{ width: 120 }}
               onChange={handleChange}
               className="ml-3"
+              value={sort}
             >
               <Option value="">Silahkan Pilih Filter</Option>
               <Option value="rw_name ASC">A - Z</Option>
