@@ -77,7 +77,7 @@ const Login = () => {
           )}
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Submit
+              Masuk
             </Button>
           </Form.Item>
         </Form>

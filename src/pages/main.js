@@ -295,6 +295,11 @@ const Main = () => {
     }
   }
 
+  const handleLogut = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+  };
+
   return (
     <>
       <Card
@@ -306,6 +311,9 @@ const Main = () => {
               Tambah Data
             </Button>{" "}
             <Button type="primary" icon={<DownloadOutlined />} />
+            <Button type="danger" className="ml-3" onClick={handleLogut}>
+              Keluar
+            </Button>
           </>
         }
       >
