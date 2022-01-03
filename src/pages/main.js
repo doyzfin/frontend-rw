@@ -92,7 +92,7 @@ const Main = () => {
   }, []);
 
   const getData = () => {
-    axiosApiIntances.get("/rw").then((res) => {
+    axiosApiIntances.get(`/rw?sort=rw_id DESC`).then((res) => {
       setData(
         res.data.data.map((item, index) => {
           return {
